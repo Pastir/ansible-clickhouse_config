@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+{{ ansible_managed | comment('xml') }}
+
+<clickhouse>
+{% if merged_clickhouse_logger is defined %}
+    <!-- logger settings section -->
+    <logger>
+{% for key, value in merged_clickhouse_logger.items() %}
+      <{{ key }}>{{ value }}</{{ key }}>
+{% endfor %}
+    </logger>
+{% endif %}
+
+{% if merged_merge_tree is defined %}
+    <!-- merge_tree settings section -->
+    <merge_tree>
+{% for key, value in merged_merge_tree.items() %}
+      <{{ key }}>{{ value }}</{{ key }}>
+{% endfor %}
+    </merge_tree>
+{% endif %}
+
+    <!-- global settings section -->
+{% for key, value in merged_clickhouse_global_settings.items() %}
+{% if key == 'listen_host' %}
+{% for item_lh in value %}
+    <listen_host>{{ item_lh }}</listen_host>
+{% endfor %}
+{% else %}
+    <{{ key }}>{{ value }}</{{ key }}>
+{% endif %}
+{% endfor %}
+
+{% if merged_query_log is defined %}
+    <!-- query_log settings section -->
+    <query_log>
+{% for key, value in merged_query_log.items() %}
+      <{{ key }}>{{ value }}</{{ key }}>
+{% endfor %}
+    </query_log>
+{% endif %}
+
+{% if merged_resharding is defined %}
+    <!-- resharding settings section -->
+    <resharding>
+{% for key, value in merged_resharding.items() %}
+      <{{ key }}>{{ value }}</{{ key }}>
+{% endfor %}
+    </resharding>
+{% endif %}
+
+</clickhouse>

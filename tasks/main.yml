@@ -1,0 +1,77 @@
+# Merged section server config
+- name: Block upload config.xml
+  block:
+    - name: Merging with clickhouse_merge_tree_settings priority
+      ansible.builtin.set_fact:
+        merged_merge_tree: "{{ __clickhouse_merge_tree_settings | combine(clickhouse_merge_tree_settings | default({}), recursive=True) }}"
+
+    - name: Merging with clickhouse_global_settings priority
+      ansible.builtin.set_fact:
+        merged_clickhouse_global_settings: "{{ __clickhouse_global_settings | combine(clickhouse_global_settings | default({}), recursive=True) }}"
+
+    - name: Merging with clickhouse_query_log priority
+      ansible.builtin.set_fact:
+        merged_query_log: "{{ __clickhouse_query_log | combine(clickhouse_query_log | default({}), recursive=True) }}"
+
+    - name: Merging with clickhouse_logger_settings priority
+      ansible.builtin.set_fact:
+        merged_clickhouse_logger: "{{ __clickhouse_logger_settings | combine(clickhouse_logger_settings | default({}), recursive=True) }}"
+
+    - name: Merging with clickhouse_resharding priority
+      ansible.builtin.set_fact:
+        merged_resharding: "{{ __clickhouse_resharding | combine(clickhouse_resharding | default({}), recursive=True) }}"
+
+    - name: Upload config.xml
+      ansible.builtin.template:
+        src: "templates/config.xml.j2"
+        dest: "{{ clickhouse_conf_dir | default(__clickhouse_conf_dir) }}/config.xml"
+        owner: "{{ clickhouse_owner | default(__clickhouse_owner) }}"
+        group: "{{ clickhouse_group | default(__clickhouse_group) }}"
+        mode: 0640
+  tags:
+    - server_config
+
+
+- name: Block upload users.xml
+  block:
+    # Profiles
+    - name: Initializing the list merged_user_profiles_settings
+      set_fact:
+        merged_user_profiles_settings: []
+
+    - name: Consolidate settings for each user with priority clickhouse_user_profiles_settings
+      set_fact:
+        merged_user_profiles_settings: "{{ merged_user_profiles_settings + [ item | combine( ((clickhouse_user_profiles_settings | default({})) | selectattr('name', 'equalto', item.name) | first) | default({}) ) ] }}"
+      loop: "{{ __clickhouse_user_profiles_settings }}"
+
+    # Quotas
+    - name: Initializing the list merged_user_quotas_settings
+      set_fact:
+        merged_user_quotas_settings: []
+
+    - name: Consolidate settings for each user with priority clickhouse_user_quotas_settings
+      set_fact:
+        merged_user_quotas_settings: "{{ merged_user_quotas_settings + [ item | combine( ((clickhouse_user_quotas_settings | default({})) | selectattr('name', 'equalto', item.name) | first) | default({}) ) ] }}"
+      loop: "{{ __clickhouse_user_quotas_settings }}"
+
+    # Users
+    - name: Initializing the list clickhouse_users_settings
+      set_fact:
+        merged_users_settings: []
+
+    - name: Consolidate settings for each user with priority clickhouse_users_settings
+      set_fact:
+        merged_users_settings: "{{ merged_users_settings + [ item | combine( ((clickhouse_users_settings | default({})) | selectattr('name', 'equalto', item.name) | first) | default({}) ) ] }}"
+      loop: "{{ __clickhouse_users_settings }}"
+
+    - name: Upload template users config and add default user.
+      ansible.builtin.template:
+        src: "templates/users.xml.j2"
+        dest: "{{ clickhouse_conf_dir | default(__clickhouse_conf_dir) }}/users.xml"
+        owner: "{{ clickhouse_owner | default(__clickhouse_owner) }}"
+        group: "{{ clickhouse_group | default(__clickhouse_group) }}"
+        mode: 0640
+      notify: restart_clickhouse_server
+
+  tags:
+    - user_config

@@ -1,0 +1,11 @@
+# handlers file for pastir.clickhouse_configure
+- name: restart_clickhouse_server
+  ansible.builtin.systemd:
+    name: clickhouse-server
+    state: restarted
+
+- name: start_clickhouse_server
+  ansible.builtin.systemd:
+    name: clickhouse-server
+    enabled: true
+    state: started

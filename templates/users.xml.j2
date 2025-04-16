@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+{{ ansible_managed | comment('xml') }}
+
+<clickhouse>
+    <!-- Profiles of settings. -->
+    <profiles>
+
+{% for profile in merged_user_profiles_settings %}
+       <{{ profile.name }}>
+{% for key, value in profile.items() %}
+{% if key != 'name' %}
+         <{{ key }}>{{ value }}</{{ key }}>
+{% endif %}
+{% endfor %}
+       </{{ profile.name }}>
+
+{% endfor %}
+    </profiles>
+
+    <!-- Users and ACL. -->
+    <users>
+
+{% for user in merged_users_settings %}
+       <{{ user.name }}>
+{% for key, value in user.items() %}
+{% if key != 'name' and key != 'networks' %}
+         <{{ key }}>{{ value }}</{{ key }}>
+{% elif key == 'networks' %}
+         <networks>
+{% for ip in value.ip %}
+             <ip>{{ ip }}</ip>
+{% endfor %}
+         </networks>
+{% endif %}
+{% endfor %}
+       </{{ user.name }}>
+
+{% endfor %}
+
+    </users>
+
+    <!-- Quotas. -->
+    <quotas>
+
+{% for quotas in merged_user_quotas_settings %}
+       <{{ quotas.name }}>
+          <interval>
+{% for key, value in quotas.items() %}
+{% if key != 'name' %}
+             <{{ key }}>{{ value }}</{{ key }}>
+{% endif %}
+{% endfor %}
+          </interval>
+       </{{ quotas.name }}>
+
+{% endfor %}
+
+    </quotas>
+</clickhouse>

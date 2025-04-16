@@ -1,0 +1,23 @@
+galaxy_info:
+  author: Ivan Pastir
+  description: clickhouse-server settings
+  license: Apache License, Version 2.0
+
+  min_ansible_version: '2.9'
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+        - focal
+        - jammy
+
+  galaxy_tags:
+    - clickhouse-server
+    - clickhouse
+    - server
+    - database
+    - configuration
+    - settings
+
+dependencies: []

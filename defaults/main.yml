@@ -1,0 +1,161 @@
+__clickhouse_service: 'clickhouse-server'
+__clickhouse_conf_dir: '/etc/clickhouse-server'
+__clickhouse_owner: clickhouse
+__clickhouse_group: clickhouse
+
+# defaults file for pastir.clickhouse_configure
+# https://clickhouse.com/docs/en/operations/server-configuration-parameters/settings
+__clickhouse_global_settings:
+  listen_host:
+    - 0.0.0.0
+  tcp_port: 9000
+  http_port: 8123
+  
+  # Path to a folder where a ClickHouse server stores user and role configurations created by SQL commands.
+  access_control_path: /var/lib/clickhouse/access/
+
+  # Path on the local filesystem to store temporary data for processing large queries.
+  tmp_path: "/var/lib/clickhouse/tmp/"
+
+  # The path to the directory containing data.
+  path: /var/lib/clickhouse/
+
+  # Max server connections.
+  # Default: 1024
+  max_connections: 1024
+
+  # The number of seconds that ClickHouse waits for incoming requests before closing the connection.
+  # Default: 10
+  keep_alive_timeout: 10
+
+  # Limit on total number of concurrently executed queries. Note that limits on INSERT and SELECT queries,
+  # and on the maximum number of queries for users must also be considered.
+  # Default value: 0 (no limit).
+  max_concurrent_queries: 0
+
+  # Maximum cache size (in bytes) for uncompressed data used by table engines from the MergeTree family.
+  # There is one shared cache for the server. Memory is allocated on demand. The cache is used if the option use_uncompressed_cache is enabled.
+  # The uncompressed cache is advantageous for very short queries in individual cases.
+  # A value of 0 means disabled.
+  # This setting can be modified at runtime and will take effect immediately.
+  uncompressed_cache_size: 0
+
+  # Maximum size of cache for marks (index of MergeTree family of tables).
+  # Default: 5368709120
+  mark_cache_size: 5368709120
+
+  # Path to the file that contains:
+  # User configurations.
+  # Access rights.
+  # Settings profiles.
+  # Quota settings.
+  users_config: users.xml
+
+  # Default settings profile. Settings profiles are located in the file specified in the setting user_config.
+  default_profile: default
+
+  # The default database name.
+  # Default: default
+  default_database: default
+
+  # builtin_dictionaries_reload_interval
+  # The interval in seconds before reloading built-in dictionaries.
+  # ClickHouse reloads built-in dictionaries every x seconds.
+  # This makes it possible to edit dictionaries "on the fly" without restarting the server.
+  # Default: 3600
+  builtin_dictionaries_reload_interval: 3600
+
+  # Maximum session timeout, in seconds.
+  # Default: 3600
+  max_session_timeout: 3600
+
+  # Default session timeout, in seconds.
+  # Default: 60
+  default_session_timeout: 60
+
+  # The path to the config file for dictionaries.
+  # Path:
+  # Specify the absolute path or the path relative to the server config file.
+  # The path can contain wildcards * and ?.
+  dictionaries_config: "*_dictionary.xml"
+
+  # default UTC
+  timezone: 'UTC'
+
+# https://clickhouse.com/docs/en/operations/server-configuration-parameters/settings#query-log
+__clickhouse_query_log:
+  database: system
+  table: query_log
+
+  # Interval for flushing data from the buffer in memory to the table.
+  # Default: 7500
+  flush_interval_milliseconds: 7500
+
+
+# https://clickhouse.com/docs/en/operations/server-configuration-parameters/settings#logger
+__clickhouse_logger_settings:
+  level: debug
+  log: /var/log/clickhouse-server/clickhouse-server.log
+  errorlog: /var/log/clickhouse-server/clickhouse-server.err.log
+  size: 1000M
+  count: 10
+
+# https://clickhouse.com/docs/en/operations/settings/merge-tree-settings
+__clickhouse_merge_tree_settings:
+  # Max size of all broken parts, if more - deny automatic deletion.
+  # Default value: 1073741824
+  max_suspicious_broken_parts_bytes: 1073741824
+  # If the number of broken parts in a single partition exceeds the max_suspicious_broken_parts value, automatic deletion is denied.
+  # Default value: 100.
+  max_suspicious_broken_parts: 100
+  # Allow Nullable types as primary keys.
+  # Default value: 0.
+  allow_nullable_key: 0
+
+__clickhouse_resharding:
+  task_queue_path: /clickhouse/task_queue
+
+
+# https://clickhouse.com/docs/en/operations/settings/query-complexity
+__clickhouse_user_profiles_settings:
+  - name: default
+
+    # Maximum memory usage for processing of single query. Zero means unlimited.
+    # The default setting is unlimited (set to 0).
+    max_memory_usage: 0
+
+    # If memory usage during ORDER BY operation is exceeding this threshold in bytes, activate the 'external sorting'
+    # mode (spill data to disk). Recommended value is half of the available system memory.
+    # Default value: 0.
+    max_bytes_before_external_sort: 0
+
+    # If memory usage during GROUP BY operation is exceeding this threshold in bytes, activate the 'external aggregation'
+    # mode (spill data to disk). Recommended value is half of the available system memory
+    # Default value: 0.
+    max_bytes_before_external_group_by: 0
+
+  - name: readonly
+    readonly: 1
+
+# https://clickhouse.com/docs/en/operations/quotas
+__clickhouse_user_quotas_settings:
+  - name: default
+    duration: 3600
+    queries: 0
+    errors: 0
+    result_rows: 0
+    read_rows: 0
+    execution_time: 0
+
+__clickhouse_users_settings:
+  - name: default
+    # https://clickhouse.com/docs/en/operations/settings/settings-users
+    # This setting enables or disables using of SQL-driven access control and account management for the user.
+    # Default value: 0.
+    access_management: true
+    networks:
+      ip:
+        - "::/0"
+    password: qwerty
+    profile: default
+    quota: default
