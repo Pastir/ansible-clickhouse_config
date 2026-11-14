@@ -28,6 +28,8 @@
         owner: "{{ clickhouse_owner | default(__clickhouse_owner) }}"
         group: "{{ clickhouse_group | default(__clickhouse_group) }}"
         mode: 0640
+        # копия прежнего файла рядом (<file>.<pid>.<дата>~) перед перезаписью
+        backup: yes
   tags:
     - server_config
 
@@ -71,6 +73,8 @@
         owner: "{{ clickhouse_owner | default(__clickhouse_owner) }}"
         group: "{{ clickhouse_group | default(__clickhouse_group) }}"
         mode: 0640
+        # копия прежнего файла рядом (<file>.<pid>.<дата>~) перед перезаписью
+        backup: yes
       notify: restart_clickhouse_server
 
   tags:
